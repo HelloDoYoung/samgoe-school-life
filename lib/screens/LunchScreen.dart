@@ -88,7 +88,7 @@ class _LunchScreenState extends State<LunchScreen> {
           padding: EdgeInsets.all(16.0),
           children: [
             Text(
-              '급식 메뉴',
+              '오늘의 급식',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
