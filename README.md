@@ -1,6 +1,6 @@
-# samgoe
+# SAMGOE HIGH SCHOOL SCHOOL LIFE
 
-A new Flutter project.
+삼괴고등학교 학생들을 위한 모바일 학생증 & 정보제공앱 입니다.
 
 ## Getting Started
 
