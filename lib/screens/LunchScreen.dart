@@ -9,13 +9,38 @@ class LunchScreen extends StatefulWidget {
 }
 
 class _LunchScreenState extends State<LunchScreen> {
+  Map<String, dynamic>? breakfastData;
   Map<String, dynamic>? lunchData;
+  Map<String, dynamic>? dinnerData;
   String? errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _fetchBreakfastData();
     _fetchLunchData();
+    _fetchDinnerData();
+  }
+
+  Future<void> _fetchBreakfastData() async {
+    final response = await http.get(Uri.parse('https://api.doyoung.tech/school/index.php?type=breakfast'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status']['code'] == 'INFO-000') {
+        setState(() {
+          breakfastData = data;
+        });
+      } else {
+        setState(() {
+          errorMessage = data['status']['message'];
+        });
+      }
+    } else {
+      setState(() {
+        errorMessage = '조식 정보를 불러오지 못했습니다.';
+      });
+    }
   }
 
   Future<void> _fetchLunchData() async {
@@ -34,60 +59,111 @@ class _LunchScreenState extends State<LunchScreen> {
       }
     } else {
       setState(() {
-        errorMessage = '급식 정보를 불러오지 못했습니다.';
+        errorMessage = '중식 정보를 불러오지 못했습니다.';
       });
     }
   }
 
-  Widget buildLunchMenu() {
-    if (lunchData == null || lunchData!['menu'] == null) {
-      return CircularProgressIndicator();
-    }
+  Future<void> _fetchDinnerData() async {
+    final response = await http.get(Uri.parse('https://api.doyoung.tech/school/index.php?type=dinner'));
 
-    List<Widget> menuItems = [];
-    lunchData!['menu'].forEach((key, value) {
-      menuItems.add(ListTile(
-        title: Text(value.toString()),
-      ));
-    });
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: menuItems,
-    );
-  }
-
-  Widget buildNutritionInfo() {
-    if (lunchData == null || lunchData!['ntr_info'] == null || lunchData!['ntr_info'] is! Map) {
-      return SizedBox();
-    }
-
-    List<Widget> nutritionItems = [];
-    lunchData!['ntr_info'].forEach((key, value) {
-      if (value is Map && value.containsKey('name') && value.containsKey('value')) {
-        nutritionItems.add(ListTile(
-          title: Text('${value['name']}: ${value['value']}'),
-        ));
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['status']['code'] == 'INFO-000') {
+        setState(() {
+          dinnerData = data;
+        });
+      } else {
+        setState(() {
+          errorMessage = data['status']['message'];
+        });
       }
-    });
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: nutritionItems,
-    );
+    } else {
+      setState(() {
+        errorMessage = '석식 정보를 불러오지 못했습니다.';
+      });
+    }
   }
 
-  Widget buildCalInfo() {
-    if (lunchData == null || lunchData!['cal_info'] == null) {
-      return SizedBox();
+  Widget buildMealBox(Map<String, dynamic>? mealData, String mealType) {
+    if (mealData == null) {
+      return Center(child: CircularProgressIndicator());
     }
 
-    return Text('칼로리: ${lunchData!['cal_info'].toString()}', style: TextStyle(fontSize: 16));
+    // 특정 mealType에 따라 필터 적용
+    final mealEntries = (mealData['menu'] as Map<String, dynamic>).entries
+        .where((entry) {
+      if (mealType == '조식') {
+        return entry.key.startsWith('breakfast');
+      } else if (mealType == '중식') {
+        return entry.key.startsWith('meal');
+      } else if (mealType == '석식') {
+        return entry.key.startsWith('dinner');
+      }
+      return false;
+    });
+
+    return Container(
+      margin: EdgeInsets.all(8.0),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: Border.all(width: 2.0, color: Colors.black),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return ListView(
+                padding: EdgeInsets.all(16.0),
+                children: [
+                  Text(
+                    '$mealType 상세 정보',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 20),
+                  if (mealData['ntr_info'] != null)
+                    ...mealData['ntr_info'].entries.map<Widget>((entry) {
+                      return ListTile(
+                        title: Text('${entry.value['name']}: ${entry.value['value']}'),
+                      );
+                    }).toList(),
+                  SizedBox(height: 20),
+                  if (mealData['cal_info'] != null)
+                    Text(
+                      '칼로리: ${mealData['cal_info'].toString()}',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                ],
+              );
+            },
+          );
+        },
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                mealType,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              ...mealEntries.map<Widget>((entry) {
+                return Text(entry.value.toString());
+              }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: CustomAppBar(),
       endDrawer: Drawer(
         child: ListView(
@@ -128,27 +204,14 @@ class _LunchScreenState extends State<LunchScreen> {
       body: Center(
         child: errorMessage != null
             ? Text(errorMessage!)
-            : lunchData == null
-            ? CircularProgressIndicator()
-            : ListView(
-          padding: EdgeInsets.all(16.0),
-          children: [
-            Text(
-              '오늘의 급식',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            buildLunchMenu(),
-            SizedBox(height: 20),
-            Text(
-              '영양 정보',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            buildNutritionInfo(),
-            SizedBox(height: 20),
-            buildCalInfo(),
-          ],
+            : SingleChildScrollView(
+          child: Column(
+            children: [
+              buildMealBox(breakfastData, '조식'),
+              buildMealBox(lunchData, '중식'),
+              buildMealBox(dinnerData, '석식'),
+            ],
+          ),
         ),
       ),
     );
