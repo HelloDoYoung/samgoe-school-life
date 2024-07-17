@@ -148,7 +148,7 @@ class _QRScreenState extends State<QRScreen> {
                   children: [
                     Text(
                       '$studentGrade학년',
-                      style: TextStyle(fontSize: 30),
+                      style: TextStyle(fontSize: 20),
                     ),
                     Text(
                       '$studentClass반',

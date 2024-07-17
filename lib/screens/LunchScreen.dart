@@ -39,6 +39,52 @@ class _LunchScreenState extends State<LunchScreen> {
     }
   }
 
+  Widget buildLunchMenu() {
+    if (lunchData == null || lunchData!['menu'] == null) {
+      return CircularProgressIndicator();
+    }
+
+    List<Widget> menuItems = [];
+    lunchData!['menu'].forEach((key, value) {
+      menuItems.add(ListTile(
+        title: Text(value.toString()),
+      ));
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: menuItems,
+    );
+  }
+
+  Widget buildNutritionInfo() {
+    if (lunchData == null || lunchData!['ntr_info'] == null || lunchData!['ntr_info'] is! Map) {
+      return SizedBox();
+    }
+
+    List<Widget> nutritionItems = [];
+    lunchData!['ntr_info'].forEach((key, value) {
+      if (value is Map && value.containsKey('name') && value.containsKey('value')) {
+        nutritionItems.add(ListTile(
+          title: Text('${value['name']}: ${value['value']}'),
+        ));
+      }
+    });
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: nutritionItems,
+    );
+  }
+
+  Widget buildCalInfo() {
+    if (lunchData == null || lunchData!['cal_info'] == null) {
+      return SizedBox();
+    }
+
+    return Text('칼로리: ${lunchData!['cal_info'].toString()}', style: TextStyle(fontSize: 16));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,27 +138,16 @@ class _LunchScreenState extends State<LunchScreen> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            ...lunchData!['menu'].entries.map<Widget>((entry) {
-              return ListTile(
-                title: Text(entry.value),
-              );
-            }).toList(),
+            buildLunchMenu(),
             SizedBox(height: 20),
             Text(
               '영양 정보',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
-            ...lunchData!['ntr_info'].entries.map<Widget>((entry) {
-              return ListTile(
-                title: Text('${entry.value['name']}: ${entry.value['value']}'),
-              );
-            }).toList(),
+            buildNutritionInfo(),
             SizedBox(height: 20),
-            Text(
-              '칼로리: ${lunchData!['cal_info']}',
-              style: TextStyle(fontSize: 16),
-            ),
+            buildCalInfo(),
           ],
         ),
       ),
