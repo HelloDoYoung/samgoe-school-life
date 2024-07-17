@@ -14,12 +14,26 @@ class _LunchScreenState extends State<LunchScreen> {
   Map<String, dynamic>? dinnerData;
   String? errorMessage;
 
+  bool isLoading = true; // 데이터가 로딩 중인지 여부를 나타내는 플래그
+
   @override
   void initState() {
     super.initState();
-    _fetchBreakfastData();
-    _fetchLunchData();
-    _fetchDinnerData();
+    _fetchAllData(); // 모든 데이터를 한 번에 가져오는 함수 호출
+  }
+
+  Future<void> _fetchAllData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      await Future.wait([_fetchBreakfastData(), _fetchLunchData(), _fetchDinnerData()]);
+    } finally {
+      setState(() {
+        isLoading = false; // 모든 데이터 로딩이 끝나면 플래그 업데이트
+      });
+    }
   }
 
   Future<void> _fetchBreakfastData() async {
@@ -90,7 +104,6 @@ class _LunchScreenState extends State<LunchScreen> {
       return Center(child: CircularProgressIndicator());
     }
 
-    // 특정 mealType에 따라 필터 적용
     final mealEntries = (mealData['menu'] as Map<String, dynamic>).entries
         .where((entry) {
       if (mealType == '조식') {
@@ -197,12 +210,13 @@ class _LunchScreenState extends State<LunchScreen> {
                 Navigator.of(context).pushNamed('/lunch');
               },
             ),
-            // Add more options here for timetable, academic schedule, etc.
           ],
         ),
       ),
       body: Center(
-        child: errorMessage != null
+        child: isLoading
+            ? Text("급식을 로딩중입니다...")
+            : errorMessage != null
             ? Text(errorMessage!)
             : SingleChildScrollView(
           child: Column(

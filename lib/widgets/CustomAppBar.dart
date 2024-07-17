@@ -24,8 +24,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
       ],
+      title: GestureDetector(
+        onTap: () {
+          Navigator.pushReplacementNamed(context, '/'); // Navigate to QRScreen
+        },
+        child: Image.asset('assets/logo.png', height: 50),
+      ),
       centerTitle: true,
-      title: Image.asset('assets/logo.png', height: 50),
     );
   }
 }
