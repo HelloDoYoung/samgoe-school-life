@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_windowmanager/flutter_windowmanager.dart'; // 추가
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../widgets/CustomAppBar.dart';
@@ -22,7 +23,13 @@ class _QRScreenState extends State<QRScreen> {
   @override
   void initState() {
     super.initState();
+    _secureScreen(); // 추가
     _fetchQRCode();
+  }
+
+  // 추가된 메서드
+  Future<void> _secureScreen() async {
+    await FlutterWindowManager.addFlags(FlutterWindowManager.FLAG_SECURE);
   }
 
   Future<void> _fetchQRCode() async {
