@@ -2,15 +2,11 @@
 
 삼괴고등학교 학생들을 위한 모바일 학생증 & 정보제공앱 입니다.
 
-## Getting Started
+## 사용방법
+Flutter, Android Studio, Xcode 를 설치한 후 Build합니다.
+iOS는 개발자 계정을 필요로합니다.
+최신 버전은 Release 탭을 참고하십시오.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 저작권
+이 앱과 코드의 모든 저작권은 김도영과 삼괴고등학교 S.E.C동아리에 있습니다.
+본 이미지에 사용된 삼괴고등학교 로고 이미지는 삼괴고등학교에 저작권이 있습니다.
